@@ -45,7 +45,7 @@ public class TestingClientRepo implements IClientRepository {
 
     @NonNull
     @Override
-    public Optional<Client> findById(Integer integer) {
+    public Optional<Client> findById(@NonNull Integer integer) {
         if (fakeDatabase.containsKey(integer)) {
             return Optional.of(fakeDatabase.get(integer));
         }
@@ -54,7 +54,7 @@ public class TestingClientRepo implements IClientRepository {
 
     @NonNull
     @Override
-    public boolean existsById(Integer integer) {
+    public boolean existsById(@NonNull Integer integer) {
         return fakeDatabase.containsKey(integer);
     }
 
@@ -68,7 +68,7 @@ public class TestingClientRepo implements IClientRepository {
     @Override
     public Iterable<Client> findAllById(Iterable<Integer> integers) {
         List<Client> clients = new LinkedList<>();
-        for(Integer integer : integers) {
+        for (Integer integer : integers) {
             Optional<Client> findResult = findById(integer);
             findResult.ifPresent(clients::add);
         }
@@ -81,14 +81,14 @@ public class TestingClientRepo implements IClientRepository {
     }
 
     @Override
-    public void deleteById(Integer integer) {
+    public void deleteById(@NonNull Integer integer) {
         fakeDatabase.remove(integer);
     }
 
     @Override
     public void delete(Client entity) {
         Integer id = entity.getId();
-        if(id != null) {
+        if (id != null) {
             deleteById(id);
         }
         throw new IllegalArgumentException("Entity id is null. Test database does not provide search functionality.");
@@ -96,14 +96,14 @@ public class TestingClientRepo implements IClientRepository {
 
     @Override
     public void deleteAllById(Iterable<? extends Integer> integers) {
-        for(Integer integer : integers) {
+        for (Integer integer : integers) {
             deleteById(integer);
         }
     }
 
     @Override
     public void deleteAll(Iterable<? extends Client> entities) {
-        for(Client entity : entities) {
+        for (Client entity : entities) {
             delete(entity);
         }
     }
