@@ -124,5 +124,16 @@ public class TestingCDRRecordsRepo implements ICDRRecordRepository {
         }
         return CDRs;
     }
+
+    @Override
+    public List<CDRRecord> getCDRRecordsByClientPhoneNumber(String fromPhoneNumber) {
+        List<CDRRecord> CDRs = new LinkedList<>();
+        for(var val : fakeDatabase.values()) {
+            if(val.getClientPhoneNumber().equals(fromPhoneNumber)) {
+                CDRs.add(val);
+            }
+        }
+        return CDRs;
+    }
 }
 
