@@ -1,4 +1,4 @@
-package com.fuzis.techtask;
+package com.fuzis.techtask.Testing;
 
 import com.fuzis.techtask.Entities.Client;
 import com.fuzis.techtask.Repositories.IClientRepository;
@@ -111,5 +111,16 @@ public class TestingClientRepo implements IClientRepository {
     @Override
     public void deleteAll() {
         fakeDatabase.clear();
+    }
+
+    @NonNull
+    @Override
+    public Optional<Client> findByPhoneNumber(String phoneNumber) {
+        for (Client client : fakeDatabase.values()) {
+            if (client.getPhoneNumber().equals(phoneNumber)) {
+                return Optional.of(client);
+            }
+        }
+        return Optional.empty();
     }
 }
