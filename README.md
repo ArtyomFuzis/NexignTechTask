@@ -19,10 +19,10 @@
 5. Все CDR отчеты лежат в директории *reports*. Их UUID - это последние 7 цифр 
 номера телефона абонента и sha256 хэш отчета 
 ### Примеры запросов 
-http://localhost:8080/api/getudr?phone_number=%2B41750549042
-http://localhost:8080/api/getudr?phone_number=27823235246&month=4&year=2025
-http://localhost:8080/api/getudrall
-http://localhost:8080/api/getudrall?month=3&year=2026
+http://localhost:8080/api/getudr?phone_number=%2B41750549042 \
+http://localhost:8080/api/getudr?phone_number=27823235246&month=4&year=2025 \
+http://localhost:8080/api/getudrall \
+http://localhost:8080/api/getudrall?month=3&year=2026 \
 http://localhost:8080/api/createcdr?phone_number=27823235246&month_start=4&month_end=7&day_start=1&day_end=1&year_start=2025&year_end=2025
 ### Запуск
 Готовый бинарник есть на [Яндекс Диске](https://disk.yandex.ru/d/jiabuR8XSmxuuA) \
