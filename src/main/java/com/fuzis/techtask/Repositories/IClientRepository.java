@@ -6,8 +6,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * Репозиторий для Entity Client. Наследует весь интерфейс CRUD репозитория
+ * и реализует метод {@code findByPhoneNumber} - поиск объекта Client по указанному номеру телефона
+ */
 @Repository
-public interface IClientRepository extends CrudRepository<Client, Integer>
-{
+public interface IClientRepository extends CrudRepository<Client, Integer> {
     Optional<Client> findByPhoneNumber(String number);
 }

@@ -5,6 +5,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+/**
+ * Entity для хранения абонентов текущей сети в базе данных. Содержит в себе пока только поле
+ * {@code phoneNumber} и индекс для БД. <br>
+ * В данной классе представлены getтеры и setтеры для обращения ко всем указаным полям.
+ */
 @Entity
 public class Client {
     @Id

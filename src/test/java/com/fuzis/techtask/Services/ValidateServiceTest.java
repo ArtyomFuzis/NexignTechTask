@@ -4,7 +4,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Тесты для класса ValidateService
+ */
 class ValidateServiceTest {
+    /**
+     * Тест на работоспособность метода ValidatePhoneNumber
+     */
     @Test
     void testValidatePhoneNumber() {
         ValidateService vs = new ValidateService();

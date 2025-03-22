@@ -8,8 +8,13 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
+/**
+ * Тесты для класса CDRGenerator
+ */
 class CDRGeneratorTest {
-
+    /**
+     * Тест на работоспособность метода generateClients
+     */
     @Test
     void generateClients() {
         TestingClientRepo tesClientRepo = new TestingClientRepo();
@@ -18,16 +23,19 @@ class CDRGeneratorTest {
         gen.generateClients(10);
         String prefix = null;
         System.out.println("Generated phone numbers:");
-        for(Client el : tesClientRepo.findAll()){
+        for (Client el : tesClientRepo.findAll()) {
             System.out.println(el.getPhoneNumber());
             assert el.getPhoneNumber().length() == 11 || el.getPhoneNumber().length() == 12; // +7 and 8 variant
-            if (prefix == null){
-                if(el.getPhoneNumber().length() == 11)prefix = el.getPhoneNumber().substring(0, 4);
+            if (prefix == null) {
+                if (el.getPhoneNumber().length() == 11) prefix = el.getPhoneNumber().substring(0, 4);
                 else prefix = el.getPhoneNumber().substring(0, 5);
-            }
-            else assert el.getPhoneNumber().startsWith(prefix);
+            } else assert el.getPhoneNumber().startsWith(prefix);
         }
     }
+
+    /**
+     * Тест на работоспособность метода generateCDRs
+     */
     @Test
     void generateCDRRecords() {
         TestingClientRepo tesClientRepo = new TestingClientRepo();
@@ -35,13 +43,13 @@ class CDRGeneratorTest {
         CDRGenerator gen = new CDRGenerator(tesClientRepo, testCDRRecordRepo);
         gen.generateClients(10);
         long maxTalkTimeSeconds = 10800;
-        gen.generateCDRs(1000, LocalDateTime.now(), LocalDateTime.now().plusYears(1),maxTalkTimeSeconds);
-        for(CDRRecord el : testCDRRecordRepo.findAll()){
+        gen.generateCDRs(1000, LocalDateTime.now(), LocalDateTime.now().plusYears(1), maxTalkTimeSeconds);
+        for (CDRRecord el : testCDRRecordRepo.findAll()) {
             System.out.println(el.toCSVTypeString());
             assert tesClientRepo.findByPhoneNumber(el.getClientPhoneNumber()).isPresent();
             assert el.getOtherPhoneNumber().length() == 11 || el.getOtherPhoneNumber().length() == 12;
             assert el.getTimeStart().isBefore(el.getTimeEnd());
-            assert el.getTimeStart().plusSeconds(maxTalkTimeSeconds+1).isAfter(el.getTimeEnd());
+            assert el.getTimeStart().plusSeconds(maxTalkTimeSeconds + 1).isAfter(el.getTimeEnd());
         }
     }
 }

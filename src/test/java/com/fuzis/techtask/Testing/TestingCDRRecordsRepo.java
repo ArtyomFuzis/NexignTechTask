@@ -10,6 +10,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Репозиторий для тестирования методов с использованием БД с Entity CDRRecord. Не создает реальную базу данных,
+ * все данные сохраняются в {@code HashMap} внутри объекта данного репозитория. Некоторые методы могут иметь асимптотику
+ * вплоть до O(n), где n - количество записей в {@code HashMap}.
+ */
 public class TestingCDRRecordsRepo implements ICDRRecordRepository {
     HashMap<Integer, CDRRecord> fakeDatabase;
     private Integer lastId;
@@ -117,11 +122,11 @@ public class TestingCDRRecordsRepo implements ICDRRecordRepository {
     @Override
     public List<CDRRecord> getCDRRecordsByClientPhoneNumberAndTimeStartBetween(String fromPhoneNumber, LocalDateTime timeStartAfter, LocalDateTime timeStartBefore) {
         List<CDRRecord> CDRs = new LinkedList<>();
-        for(var val : fakeDatabase.values()) {
+        for (var val : fakeDatabase.values()) {
 //            System.out.println("Client: " + fromPhoneNumber + " " + timeStartAfter + " " + timeStartBefore);
 //            System.out.println(val.toCSVTypeString());
 //            System.out.println(val.getClientPhoneNumber().equals(fromPhoneNumber) + " " + val.getTimeStart().isAfter(timeStartAfter) + " " + val.getTimeStart().isBefore(timeStartBefore));
-            if(val.getClientPhoneNumber().equals(fromPhoneNumber) && val.getTimeStart().isAfter(timeStartAfter) & val.getTimeStart().isBefore(timeStartBefore)) {
+            if (val.getClientPhoneNumber().equals(fromPhoneNumber) && val.getTimeStart().isAfter(timeStartAfter) & val.getTimeStart().isBefore(timeStartBefore)) {
                 CDRs.add(val);
             }
         }
@@ -131,8 +136,8 @@ public class TestingCDRRecordsRepo implements ICDRRecordRepository {
     @Override
     public List<CDRRecord> getCDRRecordsByClientPhoneNumber(String fromPhoneNumber) {
         List<CDRRecord> CDRs = new LinkedList<>();
-        for(var val : fakeDatabase.values()) {
-            if(val.getClientPhoneNumber().equals(fromPhoneNumber)) {
+        for (var val : fakeDatabase.values()) {
+            if (val.getClientPhoneNumber().equals(fromPhoneNumber)) {
                 CDRs.add(val);
             }
         }

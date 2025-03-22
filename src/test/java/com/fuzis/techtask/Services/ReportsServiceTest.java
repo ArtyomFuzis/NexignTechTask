@@ -10,8 +10,7 @@ import com.fuzis.techtask.Transfer.CallTime;
 import com.fuzis.techtask.Transfer.UDRReport;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileReader;
-import java.io.FileWriter;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,21 +19,42 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Тесты для класса ReportsService
+ */
 class ReportsServiceTest {
 
-    record PreparedData(ICDRRecordRepository CDRRepo, IClientRepository clientRepo, CDRGenerator CDRGen, ReportsService reportsService, LocalDateTime DTStart, Client client, Client client2) {}
+    /**
+     * Рекорд для сохранения данных после их генерации методом {@code prepare}, что создает тестовые данные в дальнейшем
+     * используемые в тестах
+     *
+     * @param CDRRepo        созданный объект TestingCDRRecordsRepo
+     * @param clientRepo     созданный объект TestingClientRecordsRepo
+     * @param CDRGen         созданный объект CDRGenerator
+     * @param reportsService созданный объект ReportsService
+     * @param DTStart        начало отсчета для сгенерированных записей
+     * @param client         первый тестовый абонент
+     * @param client2        второй тестовый абонент
+     */
+    record PreparedData(ICDRRecordRepository CDRRepo, IClientRepository clientRepo, CDRGenerator CDRGen,
+                        ReportsService reportsService, LocalDateTime DTStart, Client client, Client client2) {
+    }
 
-    private PreparedData prepare(){
+    /**
+     * Метод, что заготавливает тестовые данные для дальнейшего тестирования методов
+     *
+     * @return объект специального класса ReportsServiceTest что хранит в себе все подготовленные данные
+     */
+    private PreparedData prepare() {
         ICDRRecordRepository CDRRepo = new TestingCDRRecordsRepo();
         IClientRepository clientRepo = new TestingClientRepo();
         CDRGenerator CDRGen = new CDRGenerator(clientRepo, CDRRepo);
-        ReportsService reportsService = new ReportsService(CDRRepo, clientRepo,CDRGen );
+        ReportsService reportsService = new ReportsService(CDRRepo, clientRepo, CDRGen);
         LocalDateTime DTStart = LocalDateTime.of(2025, 1, 1, 5, 30, 0);
         LocalDateTime DTStart_five_minutes = LocalDateTime.of(2025, 1, 1, 5, 35, 0);
         LocalDateTime DTStart_ten_minutes = LocalDateTime.of(2025, 1, 1, 5, 40, 0);
@@ -43,15 +63,15 @@ class ReportsServiceTest {
         Client client2 = new Client("+75556664153");
         clientRepo.save(client);
         clientRepo.save(client2);
-        for(int i = 0 ; i < 10; i++){
-            CDRRecord CDRRec = new CDRRecord(CDRRecord.CallType.Income, client.getPhoneNumber(),   "+11111111111", DTStart, DTStart_five_minutes);
+        for (int i = 0; i < 10; i++) {
+            CDRRecord CDRRec = new CDRRecord(CDRRecord.CallType.Income, client.getPhoneNumber(), "+11111111111", DTStart, DTStart_five_minutes);
             CDRRecord CDRRec2 = new CDRRecord(CDRRecord.CallType.Outcome, client.getPhoneNumber(), "+11112211111", DTStart_thirty_seconds, DTStart_five_minutes);
             CDRRepo.save(CDRRec);
             CDRRepo.save(CDRRec2);
         }
-        CDRRecord CDRRec = new CDRRecord(CDRRecord.CallType.Outcome, client.getPhoneNumber(),  "+11111111111", DTStart, DTStart_ten_minutes);
+        CDRRecord CDRRec = new CDRRecord(CDRRecord.CallType.Outcome, client.getPhoneNumber(), "+11111111111", DTStart, DTStart_ten_minutes);
         CDRRecord CDRRec2 = new CDRRecord(CDRRecord.CallType.Outcome, client.getPhoneNumber(), "+11111111111", DTStart, DTStart_thirty_seconds);
-        CDRRecord CDRRec3 = new CDRRecord(CDRRecord.CallType.Income, client.getPhoneNumber(),  "+11111111111", DTStart_thirty_seconds, DTStart_ten_minutes);
+        CDRRecord CDRRec3 = new CDRRecord(CDRRecord.CallType.Income, client.getPhoneNumber(), "+11111111111", DTStart_thirty_seconds, DTStart_ten_minutes);
         CDRRecord CDRRec4 = new CDRRecord(CDRRecord.CallType.Income, client2.getPhoneNumber(), "+11111111111", DTStart, DTStart_ten_minutes);
         CDRRecord CDRRec5 = new CDRRecord(CDRRecord.CallType.Income, client2.getPhoneNumber(), "+11111111111", DTStart_five_minutes, DTStart_ten_minutes);
         CDRRepo.save(CDRRec);
@@ -61,17 +81,25 @@ class ReportsServiceTest {
         CDRRepo.save(CDRRec5);
         return new PreparedData(CDRRepo, clientRepo, CDRGen, reportsService, DTStart, client, client2);
     }
+
+    /**
+     * Тест на работоспособность метода getUDRReport
+     */
     @Test
-    public void getUDRReport(){
+    public void getUDRReport() {
         PreparedData preparedData = prepare();
-        UDRReport realReport = new UDRReport(preparedData.client.getPhoneNumber(), new CallTime(Duration.ofSeconds(9*60 + 30)), new CallTime(Duration.ofSeconds(45 * 60)));
+        UDRReport realReport = new UDRReport(preparedData.client.getPhoneNumber(), new CallTime(Duration.ofSeconds(9 * 60 + 30)), new CallTime(Duration.ofSeconds(45 * 60)));
         UDRReport providedReport = preparedData.reportsService.getUDRReport(preparedData.client.getPhoneNumber(), preparedData.DTStart.plusSeconds(5));
         System.out.println("Report should be: " + realReport);
         System.out.println("Report provided: " + providedReport);
         assertEquals(realReport, providedReport);
     }
+
+    /**
+     * Тест на работоспособность метода getUDRReportAllTime
+     */
     @Test
-    public void getUDRReportAllTime(){
+    public void getUDRReportAllTime() {
         PreparedData preparedData = prepare();
         UDRReport realReport = new UDRReport(preparedData.client.getPhoneNumber(), new CallTime(Duration.ofSeconds(59 * 60 + 30)), new CallTime(Duration.ofSeconds(55 * 60 + 30)));
         UDRReport providedReport = preparedData.reportsService.getUDRReport(preparedData.client.getPhoneNumber(), preparedData.DTStart);
@@ -79,11 +107,15 @@ class ReportsServiceTest {
         System.out.println("Report provided: " + providedReport);
         assertEquals(realReport, providedReport);
     }
+
+    /**
+     * Тест на работоспособность метода getAllUDRReport
+     */
     @Test
-    public void getAllUDRReport(){
+    public void getAllUDRReport() {
         PreparedData preparedData = prepare();
-        UDRReport rep1 = new UDRReport(preparedData.client.getPhoneNumber(), new CallTime(Duration.ofSeconds(9*60 + 30)), new CallTime(Duration.ofSeconds(45 * 60)));
-        UDRReport rep2 = new UDRReport(preparedData.client2.getPhoneNumber(), new CallTime(Duration.ofSeconds(5*60)), new CallTime(Duration.ofSeconds(0)));
+        UDRReport rep1 = new UDRReport(preparedData.client.getPhoneNumber(), new CallTime(Duration.ofSeconds(9 * 60 + 30)), new CallTime(Duration.ofSeconds(45 * 60)));
+        UDRReport rep2 = new UDRReport(preparedData.client2.getPhoneNumber(), new CallTime(Duration.ofSeconds(5 * 60)), new CallTime(Duration.ofSeconds(0)));
         List<UDRReport> realReports = new ArrayList<UDRReport>();
         realReports.add(rep1);
         realReports.add(rep2);
@@ -92,11 +124,15 @@ class ReportsServiceTest {
         System.out.println("Reports provided: " + providedReports.get(0) + " " + providedReports.get(1));
         assertEquals(realReports, providedReports);
     }
+
+    /**
+     * Тест на работоспособность метода getAllUDRReportAllTime
+     */
     @Test
-    public void getAllUDRReportAllTime(){
+    public void getAllUDRReportAllTime() {
         PreparedData preparedData = prepare();
-        UDRReport rep1 = new UDRReport(preparedData.client.getPhoneNumber(), new CallTime(Duration.ofSeconds(59*60 + 30)), new CallTime(Duration.ofSeconds(55 * 60 + 30)));
-        UDRReport rep2 = new UDRReport(preparedData.client2.getPhoneNumber(), new CallTime(Duration.ofSeconds(15*60)), new CallTime(Duration.ofSeconds(0)));
+        UDRReport rep1 = new UDRReport(preparedData.client.getPhoneNumber(), new CallTime(Duration.ofSeconds(59 * 60 + 30)), new CallTime(Duration.ofSeconds(55 * 60 + 30)));
+        UDRReport rep2 = new UDRReport(preparedData.client2.getPhoneNumber(), new CallTime(Duration.ofSeconds(15 * 60)), new CallTime(Duration.ofSeconds(0)));
         List<UDRReport> realReports = new ArrayList<UDRReport>();
         realReports.add(rep1);
         realReports.add(rep2);
@@ -105,18 +141,25 @@ class ReportsServiceTest {
         System.out.println("Reports provided: " + providedReports.get(0) + " " + providedReports.get(1));
         assertEquals(realReports, providedReports);
     }
+
+    /**
+     * Тест на работоспособность метода createCDR
+     *
+     * @throws NoSuchAlgorithmException перебрасывается с тестируемого метода.
+     * @throws IOException              перебрасывается с тестируемого метода.
+     */
     @Test
     public void createCDR() throws NoSuchAlgorithmException, IOException {
         PreparedData preparedData = prepare();
         String UUIDEmpty = preparedData.reportsService.createCDR(preparedData.client.getPhoneNumber(), preparedData.DTStart.plusSeconds(1), preparedData.DTStart.plusSeconds(5));
-        String UUID1 = preparedData.reportsService.createCDR(preparedData.client.getPhoneNumber(), preparedData.DTStart.minusSeconds(1), preparedData.DTStart.plusSeconds(5*60));
-        String UUID2 = preparedData.reportsService.createCDR(preparedData.client2.getPhoneNumber(), preparedData.DTStart.minusSeconds(1), preparedData.DTStart.plusSeconds(20*60));
-        Optional<String> contentEmpty = Files.readAllLines(Paths.get("reports/" + UUIDEmpty + ".csv"), StandardCharsets.UTF_8).stream().reduce((String a, String b ) -> a+b);
+        String UUID1 = preparedData.reportsService.createCDR(preparedData.client.getPhoneNumber(), preparedData.DTStart.minusSeconds(1), preparedData.DTStart.plusSeconds(5 * 60));
+        String UUID2 = preparedData.reportsService.createCDR(preparedData.client2.getPhoneNumber(), preparedData.DTStart.minusSeconds(1), preparedData.DTStart.plusSeconds(20 * 60));
+        Optional<String> contentEmpty = Files.readAllLines(Paths.get("reports/" + UUIDEmpty + ".csv"), StandardCharsets.UTF_8).stream().reduce((String a, String b) -> a + b);
         assert contentEmpty.isEmpty();
-        Optional<String> content1 = Files.readAllLines(Paths.get("reports/" + UUID1 + ".csv"), StandardCharsets.UTF_8).stream().reduce((String a, String b ) -> a+"\n"+b);
+        Optional<String> content1 = Files.readAllLines(Paths.get("reports/" + UUID1 + ".csv"), StandardCharsets.UTF_8).stream().reduce((String a, String b) -> a + "\n" + b);
         assert content1.isPresent();
         assertEquals(CDRValue1.trim(), content1.get().trim());
-        Optional<String> content2 = Files.readAllLines(Paths.get("reports/" + UUID2 + ".csv"), StandardCharsets.UTF_8).stream().reduce((String a, String b ) -> a+"\n"+b);
+        Optional<String> content2 = Files.readAllLines(Paths.get("reports/" + UUID2 + ".csv"), StandardCharsets.UTF_8).stream().reduce((String a, String b) -> a + "\n" + b);
         assert content2.isPresent();
         assertEquals(CDRValue2.trim(), content2.get().trim());
     }

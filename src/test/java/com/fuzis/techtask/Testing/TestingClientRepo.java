@@ -9,6 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Репозиторий для тестирования методов с использованием БД с Entity Client. Не создает реальную базу данных,
+ * все данные сохраняются в {@code HashMap} внутри объекта данного репозитория. Некоторые методы могут иметь асимптотику
+ * вплоть до O(n), где n - количество записей в {@code HashMap}.
+ */
 public class TestingClientRepo implements IClientRepository {
     HashMap<Integer, Client> fakeDatabase;
     private Integer lastId;

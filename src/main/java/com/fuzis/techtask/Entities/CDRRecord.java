@@ -6,15 +6,24 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 import java.io.Serializable;
-import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Entity для хранения CDR в базе данных. Содержит в себе все поля CDR: <br>
+ * {@code callType} - объект типа CallType (внутренний enum), что может принимать два значения:
+ * {@code Income} - входящий звонок (код 02), {@code Outcome} - исходящий звонок (код 01) <br>
+ * {@code clientPhoneNumber} - номер телефона абонента текущей сети<br>
+ * {@code otherPhoneNumber} - номер телефона абонента, с которым {@code clientPhoneNumber} разговаривал<br>
+ * {@code timeStart} - дата и время начала звонка<br>
+ * {@code timeEnd} - дата и время окончания звонка<br>
+ * В данной классе представлены getтеры и setтеры для обращения к полям CDR и индексу в БД. <br>
+ * Кроме них, в классе реализован метод {@code toCSVTypeString}, который преобразует все поля CDR к CSV виду для репрезентации
+ */
 @Entity
 public class CDRRecord implements Serializable {
     public enum CallType {
-        Income,
-        Outcome
+        Income, Outcome
     }
 
     @Id
@@ -86,15 +95,11 @@ public class CDRRecord implements Serializable {
         this.timeEnd = timeEnd;
     }
 
+    /**
+     * Метод для репрезентации данной CDR записи в CSV формате
+     * @return строку CSV, где разделитель - запятая и пробел
+     */
     public String toCSVTypeString() {
-        return (callType == CallType.Income ? "02" : "01") +
-                ", " +
-                clientPhoneNumber +
-                ", " +
-                otherPhoneNumber +
-                ", " +
-                timeStart.truncatedTo(ChronoUnit.SECONDS) +
-                ", " +
-                timeEnd.truncatedTo(ChronoUnit.SECONDS);
+        return (callType == CallType.Income ? "02" : "01") + ", " + clientPhoneNumber + ", " + otherPhoneNumber + ", " + timeStart.truncatedTo(ChronoUnit.SECONDS) + ", " + timeEnd.truncatedTo(ChronoUnit.SECONDS);
     }
 }
