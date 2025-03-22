@@ -115,10 +115,13 @@ public class TestingCDRRecordsRepo implements ICDRRecordRepository {
     }
 
     @Override
-    public List<CDRRecord> getCDRRecordsByClientPhoneNumberAndTimeStartAfter(String fromPhoneNumber, LocalDateTime timeStartAfter) {
+    public List<CDRRecord> getCDRRecordsByClientPhoneNumberAndTimeStartBetween(String fromPhoneNumber, LocalDateTime timeStartAfter, LocalDateTime timeStartBefore) {
         List<CDRRecord> CDRs = new LinkedList<>();
         for(var val : fakeDatabase.values()) {
-            if(val.getClientPhoneNumber().equals(fromPhoneNumber) && val.getTimeStart().isAfter(timeStartAfter)) {
+//            System.out.println("Client: " + fromPhoneNumber + " " + timeStartAfter + " " + timeStartBefore);
+//            System.out.println(val.toCSVTypeString());
+//            System.out.println(val.getClientPhoneNumber().equals(fromPhoneNumber) + " " + val.getTimeStart().isAfter(timeStartAfter) + " " + val.getTimeStart().isBefore(timeStartBefore));
+            if(val.getClientPhoneNumber().equals(fromPhoneNumber) && val.getTimeStart().isAfter(timeStartAfter) & val.getTimeStart().isBefore(timeStartBefore)) {
                 CDRs.add(val);
             }
         }

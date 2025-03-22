@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface  ICDRRecordRepository extends CrudRepository<CDRRecord, Integer> {
-    List<CDRRecord> getCDRRecordsByClientPhoneNumberAndTimeStartAfter(String fromPhoneNumber, LocalDateTime timeStartAfter);
+    List<CDRRecord> getCDRRecordsByClientPhoneNumberAndTimeStartBetween(String clientPhoneNumber, LocalDateTime timeStart, LocalDateTime timeStart2);
     List<CDRRecord> getCDRRecordsByClientPhoneNumber(String fromPhoneNumber);
 }

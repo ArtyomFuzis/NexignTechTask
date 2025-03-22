@@ -6,6 +6,7 @@ import com.fuzis.techtask.Repositories.ICDRRecordRepository;
 import com.fuzis.techtask.Repositories.IClientRepository;
 import com.fuzis.techtask.Transfer.CallTime;
 import com.fuzis.techtask.Transfer.UDRReport;
+import com.fuzis.techtask.Utils;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +14,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,7 +48,7 @@ public class ReportsService
     }
 
     public UDRReport getUDRReport(String clientPhoneNumber, LocalDateTime startDate){
-        List<CDRRecord> listCalls = CDRRecordRepository.getCDRRecordsByClientPhoneNumberAndTimeStartAfter(clientPhoneNumber, startDate.minusSeconds(1));
+        List<CDRRecord> listCalls = CDRRecordRepository.getCDRRecordsByClientPhoneNumberAndTimeStartBetween(clientPhoneNumber, startDate.minusSeconds(1), startDate.plusMonths(1).plusSeconds(1));
         return getUDRReportFromList(clientPhoneNumber, listCalls);
     }
 
@@ -78,6 +87,27 @@ public class ReportsService
             UDRReports.add(getUDRReportAllTime(client.getPhoneNumber()));
         }
         return UDRReports;
+    }
+
+    public String createCDR(String clientPhoneNumber, LocalDateTime startDate , LocalDateTime endDate) throws NoSuchAlgorithmException, IOException {
+        Files.createDirectories(Paths.get("reports/"));
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        StringBuilder sb = new StringBuilder();
+        if(clientRepository.findByPhoneNumber(clientPhoneNumber).isPresent()) {
+            List<CDRRecord> listCalls = CDRRecordRepository.getCDRRecordsByClientPhoneNumberAndTimeStartBetween(clientPhoneNumber, startDate.minusSeconds(1), endDate.plusSeconds(1));
+            listCalls.sort(new Utils.CmpCDR());
+            for (CDRRecord cdrRecord : listCalls) {
+                sb.append(cdrRecord.toCSVTypeString()).append("\n");
+                digest.update(sb.toString().getBytes());
+            }
+            String UUID = clientPhoneNumber.substring(clientPhoneNumber.length()-7)+"-"+ Utils.bytesToHex(digest.digest());
+            FileWriter f = new FileWriter("reports/" + UUID + ".csv");
+            f.write(sb.toString());
+            logger.info("Created CSV report {}.csv for client: {} ", UUID, clientPhoneNumber);
+            f.close();
+            return UUID;
+        }
+        throw new IllegalArgumentException("Client not in company's database");
     }
 
     @PostConstruct
